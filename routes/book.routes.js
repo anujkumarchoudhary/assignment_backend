@@ -8,7 +8,9 @@ const router = express.Router();
 
 // Routes
 
-router.get('/getAll', AuthMiddleware, authorizeRoles("user", "librarian"), getAllBooks);
+// router.get('/getAll', AuthMiddleware, authorizeRoles("user", "librarian"), getAllBooks);
+router.get('/getAll', getAllBooks);
+
 router.get('/getSingle/:id', AuthMiddleware, authorizeRoles("librarian"), getSingleBooks);
 router.post('/post', AuthMiddleware, authorizeRoles("librarian"), upload.single("image"), postBook);
 router.put('/update/:id', AuthMiddleware, authorizeRoles("librarian"), upload.single("image"), updateBook);
