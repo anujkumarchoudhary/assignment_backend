@@ -1,10 +1,12 @@
 import express from 'express'
-import MongoDBConnect from './config/db.js'
+import MongoDBConnect from '../config/db.js'
 import dotenv from 'dotenv'
-import userRoutes from './routes/user.routes.js'
-import bookRoutes from './routes/book.routes.js'
+import userRoutes from '../routes/user.routes.js'
+import bookRoutes from '../routes/book.routes.js'
 import path from "path";
 import { fileURLToPath } from "url";
+import serverless from 'serverless-http'
+
 import cors from 'cors'
 dotenv.config()
 const app = express()
@@ -25,6 +27,4 @@ MongoDBConnect()
 app.use('/api/v1/auth', userRoutes)
 app.use('/api/v1/book', bookRoutes)
 
-app.listen(process.env.PORT, () => {
-    console.log(`Server runing on PORT ${process.env.PORT}`)
-})
+export const handler = serverless(app)
