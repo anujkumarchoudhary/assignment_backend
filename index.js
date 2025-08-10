@@ -6,25 +6,24 @@ import bookRoutes from './routes/book.routes.js'
 import path from "path";
 import { fileURLToPath } from "url";
 import cors from 'cors'
+import serverless from 'serverless-http'
+
 dotenv.config()
 const app = express()
 
-app.use(cors());
-
+app.use(cors())
 app.use(express.json())
-app.use("/uploads", express.static("uploads"));
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+app.use("/uploads", express.static(path.join(__dirname, "uploads")))
 
-//db connect
+// DB connect
 MongoDBConnect()
 
-// routes
+// Routes
 app.use('/api/v1/auth', userRoutes)
 app.use('/api/v1/book', bookRoutes)
 
-app.listen(process.env.PORT, () => {
-    console.log(`Server runing on PORT ${process.env.PORT}`)
-})
+// Export as serverless function
+export const handler = serverless(app)
