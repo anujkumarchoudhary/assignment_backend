@@ -1,4 +1,5 @@
 import Book from '../module/book.module.js'
+import UploadToCloudinary from '../utils/cloudnary.js'
 
 export const getAllBooks = async (req, res) => {
     try {
@@ -27,26 +28,45 @@ export const getSingleBooks = async (req, res) => {
 }
 
 export const postBook = async (req, res) => {
-    const { title, author, condition, } = req.body;
-
-    const imageUrl = req.file
-        ? `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`
-        : null;
+    const { title, author, condition } = req.body;
 
     try {
-        const isExitBook = await Book.findOne({ title })
+        // Check if book already exists
+        const isExitBook = await Book.findOne({ title });
         if (isExitBook) {
-            return res.status(400).json({ message: "This book already exit" })
+            return res.status(400).json({ message: "This book already exists" });
         }
-        const newBook = new Book({ title, author, condition, image: imageUrl })
-        await newBook.save()
-        return res.status(201).json({ success: true, message: "book created successfully!", data: newBook })
+
+        let imageUrl = null;
+        
+
+        const Up = new UploadToCloudinary()
+        // Upload image to Cloudinary if file exists
+        if (req.file && req.file.path) {
+            const cloudResult = await Up.upload(req.file.path);
+            imageUrl = cloudResult.secure_url;
+        }
+
+        // Create new book
+        const newBook = new Book({
+            title,
+            author,
+            condition,
+            image: imageUrl
+        });
+
+        await newBook.save();
+
+        return res.status(201).json({
+            success: true,
+            message: "Book created successfully!",
+            data: newBook
+        });
+    } catch (err) {
+        console.error("Error creating book:", err);
+        return res.status(500).json({ message: "Internal server error" });
     }
-    catch (err) {
-        console.log("error", err)
-        return res.status(500).json({ message: "Internal server error" })
-    }
-}
+};
 
 export const requestBook = async (req, res) => {
     const { id } = req.params;
