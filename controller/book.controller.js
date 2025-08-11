@@ -1,5 +1,5 @@
+import { uploadToCloudinary } from '../config/cloudinary.config.js'
 import Book from '../module/book.module.js'
-import UploadToCloudinary from '../utils/cloudnary.js'
 
 export const getAllBooks = async (req, res) => {
     try {
@@ -38,12 +38,10 @@ export const postBook = async (req, res) => {
         }
 
         let imageUrl = null;
-        
 
-        const Up = new UploadToCloudinary()
-        // Upload image to Cloudinary if file exists
-        if (req.file && req.file.path) {
-            const cloudResult = await Up.upload(req.file.path);
+
+        if (req.file && req.file.buffer) {
+            const cloudResult = await uploadToCloudinary(req.file.buffer);
             imageUrl = cloudResult.secure_url;
         }
 
@@ -127,9 +125,13 @@ export const updateBook = async (req, res) => {
     const { title, author, condition, } = req.body;
     const { id } = req.params;
 
-    const imageUrl = req.file
-        ? `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`
-        : null;
+    let imageUrl = null;
+
+
+    if (req.file && req.file.buffer) {
+        const cloudResult = await uploadToCloudinary(req.file.buffer);
+        imageUrl = cloudResult.secure_url;
+    }
 
     try {
         const isExitBook = await Book.findById(id)
